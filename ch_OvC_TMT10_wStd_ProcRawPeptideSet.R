@@ -33,7 +33,7 @@ setwd(dir="/Users/cshughes/Documents/projects/OvC/wStd/Routput/")
 #initial processing of the data to compile peptides and remove contaminants
 ##################################################
 #dont split replicates yet or do any combination of them
-processPSM <- function(psmFile, proteinFile, ... ){	
+processPSM <- function(psmFile, proteinFile, Rep, ... ){	
 	require(limma)
 	#initial processing to remove non-informative columns and rows from contaminant proteins or those with many missing values
 	pep<-psmFile[,c(5,6,9:11,2,37:47)]
@@ -74,21 +74,22 @@ processPSM <- function(psmFile, proteinFile, ... ){
 	pep.a[,7:16] = round(pep.a[,7:16],2)
 	pep.a[,7:16][is.na(pep.a[,7:16])]<-NA
 	#filter based on S/N
-	pep.f1 = subset(pep.a, rowMeans(pep.a[,7:16], na.rm=TRUE)>5)
+	pep.f1 = subset(pep.a, rowMeans(pep.a[,7:16], na.rm=TRUE)>=5)
 	#filter based on NA
-	pep.f2 = subset(pep.f1, rowSums(is.na(pep.f1[,7:16]))<8)
+	pep.f2 = subset(pep.f1, !is.na(pep.f1[,16]))
+	pep.f3 = subset(pep.f2, rowSums(is.na(pep.f2[,7:15]))<9)
 	#add replicate counter
-	pep.f2$Rep = 'A'
+	pep.f3$Rep = Rep
 	#output the data
-	return(pep.f2)	
+	return(pep.f3)	
 }
 #run the function
-ova1.psm<-processPSM(s1apsm, s1apro)
-ova2.psm<-processPSM(s1bpsm, s1bpro)
-ova3.psm<-processPSM(s1cpsm, s1cpro)
-ovb1.psm<-processPSM(s2apsm, s2apro)
-ovb2.psm<-processPSM(s2bpsm, s2bpro)
-ovb3.psm<-processPSM(s2cpsm, s2cpro)
+ova1.psm<-processPSM(s1apsm, s1apro, 'a1')
+ova2.psm<-processPSM(s1bpsm, s1bpro, 'a2')
+ova3.psm<-processPSM(s1cpsm, s1cpro, 'a3')
+ovb1.psm<-processPSM(s2apsm, s2apro, 'b1')
+ovb2.psm<-processPSM(s2bpsm, s2bpro, 'b2')
+ovb3.psm<-processPSM(s2cpsm, s2cpro, 'b3')
 #output the data objects
 saveRDS(ova1.psm,'ch_OvC_wStd_processedPeptides_a1.rds')
 saveRDS(ova2.psm,'ch_OvC_wStd_processedPeptides_a2.rds')
@@ -98,59 +99,3 @@ saveRDS(ovb2.psm,'ch_OvC_wStd_processedPeptides_b2.rds')
 saveRDS(ovb3.psm,'ch_OvC_wStd_processedPeptides_b3.rds')
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-#below is the function you can use to do comparisons
-###############################################################################
-#do quantitative comparisons
-###############################################################################
-pepQuan <- function(x,...){
-	#subset peptides that are not present in at least 2 replicates of each condition
-	y = subset(x, rowSums(is.na(x[,5:7]))<4)
-	eset = as.matrix(y[,5:10])
-	#this puts first 3 as top of FC ratio
-	design <- cbind(SR=c(1,1,1,0,0,0),CC=c(0,0,0,1,1,1))
-	fit <- lmFit(eset,design)
-	cont.matrix <- makeContrasts(SRvsCC=SR-CC, levels=design)
-	fit2 <- contrasts.fit(fit, cont.matrix)
-	fit2 <- eBayes(fit2)
-	y$logFC = fit2$coef
-	y$pVal = fit2$p.value
-	#aggregate into proteins
-	y$pepNum = 1
-	#modify the colnames
-	colnames(y) = c('Accession','Gene','Sequence','Description','a1','a2','a3','b1','b2','b3','log_foldChange','adjusted_pValue','Number.of.Unique.Peptides')
-	#aggregate stats metrics into proteins
-	proA = aggregate(cbind(log_foldChange,adjusted_pValue)~Accession+Gene+Description,data=y,median,na.action=na.pass,na.rm=TRUE)
-	#aggregate peptide numbers into proteins
-	proAp = aggregate(Number.of.Unique.Peptides~Accession+Gene+Description,data=y,sum,na.action=na.pass,na.rm=TRUE)
-	#need to modify the colnames again for some reason
-	colnames(proA) = c('Accession','Gene','Description','log_foldChange','adjusted_pValue')
-	#merge
-	pro = merge(proA,proAp, by=c('Accession','Gene','Description'))
-	#output the data
-	return(pro)
-}
-
-#you need to choose the 6 columns you want to compare...it only does two-way comparisons
-names(vnorm) #use this to find the columns you want to compare
-#in this example, we compare wt-unt to dm-unt
-#we select only the columns we want to compare...in this case 1:4 are the annotation, always include these
-#the next six columns are the wt- repA, repB, and repC...the three after are the 3 dm replicates
-compData = vnorm[,c(1:4,9,17,25,13,21,29)]
-#run the function
-proteinSet = pepQuan(compData)
-
-#write out the data into a format usable in excel
-write.table(proteinSet,'wt-mg-mms_vs_dm-mg-mms.txt',quote=FALSE,sep='\t',col.names=TRUE,row.names=FALSE)
