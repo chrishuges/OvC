@@ -38,7 +38,8 @@ prop = merge(pec.q,anno,by='Gene')
 #reshape and reannotate dataframe
 pecP = prop[,c(1,7,8,9,2:6)]
 colnames(pecP) = c('Gene','Accession','Descriptions','pepNum','logFC','t','score','p-value','pVal')
-#write out the data into a format usable in excel
+#write out the data into a format usable in excel.
+saveRDS(pecP,'ch_OvC_Frozen_proteinSet.rds')
 write.table(pecP,'ch_OvC_Frozen_HGSvCCC_PECA_proteinSet.txt',quote=FALSE,sep='\t',col.names=TRUE,row.names=FALSE)
 #I think the PECA set looks more reliable
 

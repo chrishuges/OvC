@@ -2,37 +2,81 @@
 # 
 # Author: cshughes
 ###############################################################################
-
-
 ##################################################
 #read in the human protein atlas data, for proteins
 ##################################################
-setwd(dir="/Users/cshughes/Documents/projects/PaC/RNAseq/")
-ens<-read.table("./HumanProteomeMap_Science_TableS1.txt", header=TRUE, sep='\t')
-hpa<-read.table("./HumanProteinAtlas_ProteinExp.txt", header=TRUE, sep='\t')
-setwd(dir="/Users/cshughes/Documents/projects/PaC/Routput/")
-#subset out only pancreatic tissue samples
-hpa.p = hpa[grepl('pancreatic',hpa$Tumor),]
-#get the proteins with high protein expression
-hpa.ph = hpa.p[grepl('High',hpa.p$Level),]
-#keep only those where greater than 50% of total patients were classified as High
-hpa.ph$pHigh = hpa.ph$Count.patients/hpa.ph$Total.patients
-hpa.phs = hpa.ph[hpa.ph$pHigh>=0.6,]
-#merge with the gene expression data
-colnames(hpa.phs)[1] = 'ensg_id'
-hpa.rp = merge(hpa.phs,hpa.mi,by='ensg_id')
-#plot the FPKM overlaid with the protein data
-cols = brewer.pal(6,'Set2')
-pdf('ch_HumanProteinAtlas_FPKMwAtlasPro_Pancreas.pdf')
-hist(log2(hpa.rp[,62]),
-		col = cols[6],
-		breaks=75,
-		xlim = c(-10,15),
-		main = 'Pancreatic Tissue FPKM Distribution',
-		xlab = 'log2(FPKM Pancreatic Tissue)',
-		ylab = 'Frequency'
+setwd(dir="/Users/cshughes/Documents/projects/OvC/RNAexpression/")
+hpaP<-read.table("./ch_HPAprotein_Data.csv", header=TRUE, sep=',')
+setwd(dir="/Users/cshughes/Documents/projects/OvC/wStd/Routput/")
+##################################################
+#first lets look at just ovarian cancer
+##################################################
+#subset out only ovarian tissue samples
+hpa.p = hpaP[grepl('ovarian',hpaP$Tumor),]
+#make the scoring numeric
+high = grepl('High',hpa.p$Level)
+med = grepl('Medium',hpa.p$Level)
+low = grepl('Low',hpa.p$Level)
+hpa.p$score = '0'
+#assign numbers to levels
+hpa.p[high,8] = 9
+hpa.p[med,8] = 6
+hpa.p[low,8] = 3
+#make the expression
+hpa.p$exp = as.numeric(hpa.p$score) * hpa.p$Count.patients
+#aggregate into a single set per gene...some of the gene IDs are messed up as dates...fix later
+hpa.set = aggregate(exp~Gene.name+Total.patients,data=hpa.p,sum,na.rm=TRUE)
+#get your gene data out
+gn = c('FOLR1','CRIP1','MSLN','SNCG','CRABP2','LEFTY1','GDF15','QPCT','GPC3','CTH')
+hpa.sub = hpa.set[hpa.set$Gene %in% gn,]
+hpa.t = t(hpa.sub[,2])
+colnames(hpa.t) = hpa.sub$Gene.name
+hpa.s = hpa.t[,c(2,7,9,1,6,4,8,5,3)]
+#plot the protein data
+cols1 = c(rep(brewer.pal(9,'RdBu')[1],4),rep(brewer.pal(9,'RdBu')[9],5))
+cols2 = col2rgb(c(rep(brewer.pal(9,'RdBu')[1],4),rep(brewer.pal(9,'RdBu')[9],5)))
+#plot the data
+pdf('ch_OvC_TMT10_wStd_Human_HGSMarkers_OvC-HPA_boxplot.pdf')
+barplot(hpa.s,
+		las=2,
+		col = rgb(cols2[1,],cols2[2,],cols2[3,],25,maxColorValue=255),
+		ylab = 'HPA Expression',
+		main = 'Expression of HGS Markers in Ovarian HPA Data'
 )
-hist(log2(hpa.mi[,56]),add=TRUE,breaks=200,col=cols[3])
-hist(log2(hpa.rp[,62]),add=TRUE,breaks=75,col=cols[6])
 dev.off()
 
+
+
+
+##################################################
+#now lets do all cancers
+##################################################
+#subset out only genes of interest
+hpa.p = hpaP[grepl('MSLN',hpaP$Gene.name),]
+#make the scoring numeric
+high = grepl('High',hpa.p$Level)
+med = grepl('Medium',hpa.p$Level)
+low = grepl('Low',hpa.p$Level)
+hpa.p$score = '0'
+#assign numbers to levels
+hpa.p[high,8] = 9
+hpa.p[med,8] = 6
+hpa.p[low,8] = 3
+#make the expression
+hpa.p$exp = as.numeric(hpa.p$score) * hpa.p$Count.patients
+#aggregate into a single set per gene...some of the gene IDs are messed up as dates...fix later
+hpa.set = aggregate(exp~Tumor,data=hpa.p,sum,na.rm=TRUE)
+#plot the protein data
+cols1 = c(brewer.pal(10,'Set3'))
+cols2 = col2rgb(c(brewer.pal(10,'Set3')))
+#plot the data
+pdf('ch_OvC_TMT10_wStd_Human_HGSMarkers-MSLN_All-HPA_boxplot.pdf')
+barplot(hpa.set$exp,
+		las=2,
+		names = hpa.set$Tumor,
+		col = rgb(cols2[1,],cols2[2,],cols2[3,],25,maxColorValue=255),
+		ylab = 'HPA Expression',
+		main = 'Expression of HGS Markers in All HPA Data',
+		ylim = c(0,80)
+)
+dev.off()

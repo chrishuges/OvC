@@ -21,7 +21,7 @@ b123e = merge(b12e,b3e[,c(1,2,4,5,8:17)],by=c('Accession','Gene','Descriptions',
 #merge all replicates
 ab123e = merge(a123e,b123e,by=c('Accession','Gene','Descriptions','Sequence'))
 #take the deviation from the median
-ab123e$RLEmed = apply(ab123e[,5:64],1, function(x) median(x))
+ab123e$RLEmed = apply(ab123e[,5:64],1, function(x) median(x, na.rm=TRUE))
 vnorm = apply(ab123e[,5:64],2, function(x) x - ab123e$RLEmed)
 #make colors for the batches
 hCols = brewer.pal(6,'Accent')

@@ -80,6 +80,7 @@ processPSM <- function(psmFile, proteinFile, Rep, ... ){
 	pep.f3 = subset(pep.f2, rowSums(is.na(pep.f2[,7:15]))<9)
 	#add replicate counter
 	pep.f3$Rep = Rep
+	pep.f3$Acc = paste(pep.f3$Gene,'_',pep.f3$Accession, sep='')
 	#output the data
 	return(pep.f3)	
 }

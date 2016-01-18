@@ -62,6 +62,10 @@ agg1 = aggregate(cbind(a1,a2,a3,a4,a5,a6,a7,a8,a9)~Gene,data=z1,median,na.action
 agg2 = aggregate(cbind(a1,a2,a3,a4,a5,a6,a7,a8,a9)~Gene,data=z2,median,na.action=na.pass,na.rm=TRUE)
 #merge into a gene set
 pro = merge(agg1,agg2,by='Gene')
+#for output only
+#proOut = pro[,c(1:4,11:13,5:7,14:16,8:10,17:19)]
+#colnames(proOut) = c('Gene','t1811D','t1768A','t376D','t1842B','t1630B','t1863B','t1215B','t1210A','t1246A','t1303A','t1493A','t867A','t782A','t1683A','t1911A','t1195A','t1328A','t614A')
+#saveRDS(proOut,'ch_OvC_wStd_RLEset.rds')
 #calculate mean expression for the subtypes
 pro$hgs1 = rowMeans(pro[,c(2:4,11:13)],na.rm=TRUE)
 pro$ccc1 = rowMeans(pro[,c(5:7,14:16)],na.rm=TRUE)
@@ -73,6 +77,8 @@ proV = pro[order(-pro$var),]
 proS = subset(proV, rowSums(is.na(proV[,2:19]))==0)
 #subset the top N genes by variance
 proX = proS[1:500,]
+#output the list of variance genes
+saveRDS(proX,'ch_OvC_wStd_Top500Genes_Variance.rds')
 
 ###############################################################################
 ###PCA stuffs
@@ -85,17 +91,18 @@ pcCols = c(rep(hCols[1],6),rep(hCols[2],6),rep(hCols[3],6))
 pcPCH = c(rep(15,3),rep(19,3),rep(8,3),rep(12,3),rep(2,3),rep(11,3))
 pca <- prcomp(t(x))
 #pca <- prcomp(t(xSub),scale=TRUE,center=TRUE)
+pdf('ch_test.pdf')
 plot(pca$x[,1:2],
 		col=pcCols,
 		pch=pcPCH)
-
+dev.off()
 ###############################################################################
 ###clustering heat maps by subtype
 ###############################################################################
 #specify the number of genes to keep for the clustering
-proX = proS[1:6000,]
+proX = proS[1:10,]
 #built the heatmap
-pdf('ch_OvC_TMT10_wStd_Human_Proteins_Subtypes_Top6000_HeatMap.pdf')
+pdf('ch_OvC_TMT10_wStd_Human_Proteins_Subtypes_Top10_HeatMap.pdf')
 #make the plot labels and boundaries
 xLabels<- c('hgs1','hgs2','hgs3','ccc1','ccc2','ccc3','emc1','emc2','emc3','hgs4','hgs5','hgs6','ccc4','ccc5','ccc6','emc4','emc5','emc6')
 mybreaks = seq(-2,2,by=0.05)
@@ -105,12 +112,12 @@ heatmap.2(
 		as.matrix(proX[2:19]),
 		col= colorRampPalette(brewer.pal(6,"RdBu"))(length(mybreaks)-1),
 		symkey=TRUE,
-		Rowv=TRUE,
-		Colv=TRUE,
-		dendrogram="both",
+		Rowv=FALSE,
+		Colv=FALSE,
+		dendrogram="none",
 		breaks=mybreaks,
 		#cellnote = round(ovCor,2),
-		labRow = '',
+		labRow = proX$Gene,
 		labCol = xLabels,
 		las=2,
 		ColSideColors=ColSideColors,
@@ -141,7 +148,7 @@ dev.off()
 proX = proS[1:500,]
 pOut = proX[proX$hgs1< -1 & proX$ccc1>0.5,c(1,20:23)]
 #write out the data into a format usable in excel
-write.table(pOut,'test.txt',quote=FALSE,sep='\t',col.names=TRUE,row.names=FALSE)
+write.table(proOut,'gsea.txt',quote=FALSE,sep='\t',col.names=TRUE,row.names=FALSE)
 
 
 
