@@ -57,7 +57,7 @@ ovc_ebFit <- eBayes(ovc_fits)
 topTable(ovc_ebFit, number=10, coef=1)
 #annotate the data
 #lfc here is a fold change cutoff
-probeset.list <- topTable(ovc_ebFit, coef=2, number=10000, lfc=0)
+probeset.list <- topTable(ovc_ebFit, coef=1, number=10, lfc=0)
 gene.symbols <- getSYMBOL(exprs(celfiles.filtered$eset[row.names(probeset.list),]), "hgu133plus2")
 results <- cbind(probeset.list, gene.symbols)
 write.table(results, "results.txt", sep="\t", quote=FALSE)
@@ -172,8 +172,8 @@ topTable(ovc_ebFit, number=20, coef=1)
 probes <- topTable(ovc_ebFit, coef=1, number=50000)
 genes <- getSYMBOL(row.names(probes), "hgu133plus2")
 results <- cbind(probes, genes)
-rnaSet = aggregate(logFC~genes,data=results,median,na.action=na.pass,na.rm=TRUE)
-colnames(rnaSet) = c('Gene','RNAexp')
+rnaSet = aggregate(cbind(logFC,t)~genes,data=results,median,na.action=na.pass,na.rm=TRUE)
+colnames(rnaSet) = c('Gene','RNAexp','t')
 #output the data sets
 saveRDS(rnaSet,'ch_OvC_wStd_RNA_HGSvCCC.rds')
 ###these are the processed RNA and Protein data

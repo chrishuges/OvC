@@ -37,6 +37,7 @@ library(cgdsr)
 mycgds = CGDS("http://www.cbioportal.org/public-portal/")
 getCancerStudies(mycgds)[,2]
 #cStudies = c(17,77,27,40,97,62,94,51,7,118,88)
+#ALWAYS CHECK THESE NUMBERS AS THE LIST SEEMS TO BE FOREVER CHANGING
 cStudies = c(78,18,91,28,53,100,80,60,11,56,116)
 mRNA = list()
 gn = 'MSLN'

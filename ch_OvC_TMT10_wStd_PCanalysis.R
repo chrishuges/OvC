@@ -83,19 +83,31 @@ saveRDS(proX,'ch_OvC_wStd_Top500Genes_Variance.rds')
 ###############################################################################
 ###PCA stuffs
 ###############################################################################
-x = proX[,2:19]
-row.names(x) = proX$Gene
+#calculate mean expression for the subtypes
+pro$hgs1 = rowMeans(pro[,c(2:4,11:13)],na.rm=TRUE)
+pro$cccemc1 = rowMeans(pro[,c(5:7,14:16,8:10,17:19)],na.rm=TRUE)
+#calculate the variance and order by it
+pro$var = pro$hgs1 - pro$cccemc1
+proV = pro[order(-pro$var),]
+x = proV[rowSums(is.na(proV[,2:19]))<1,c(2:4,11:13,5:7,14:16,8:10,17:19)]
+row.names(x) = proV[rowSums(is.na(proV[,2:19]))<1,1]
+#output the list of variance genes
+saveRDS(x,'ch_OvC_wStd_RLEproteinSet_wHGSvariance.rds')
 hCols = brewer.pal(6,'Accent')
 #pcCols = c(rep(hCols[1],3),rep(hCols[2],3),rep(hCols[3],3),rep(hCols[4],3),rep(hCols[5],3),rep(hCols[6],3))
 pcCols = c(rep(hCols[1],6),rep(hCols[2],6),rep(hCols[3],6))
 pcPCH = c(rep(15,3),rep(19,3),rep(8,3),rep(12,3),rep(2,3),rep(11,3))
 pca <- prcomp(t(x))
 #pca <- prcomp(t(xSub),scale=TRUE,center=TRUE)
-pdf('ch_test.pdf')
+pdf('ch_OvC_TMT10_wStd_Human_Proteins_Subtypes_PCA.pdf')
 plot(pca$x[,1:2],
 		col=pcCols,
-		pch=pcPCH)
+		pch=pcPCH,
+		cex = 2
+)
+box(lwd=3)
 dev.off()
+
 ###############################################################################
 ###clustering heat maps by subtype
 ###############################################################################

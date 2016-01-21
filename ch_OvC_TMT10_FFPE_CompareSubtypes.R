@@ -82,7 +82,7 @@ write.table(pecP,'ch_OvC_FFPE_HGSvCCC_PECA_proteinSet.txt',quote=FALSE,sep='\t',
 #Make a volcano plot of the variance between subtypes with overlaid markers
 ###############################################################################
 #bring in the protein data
-proh = pecP
+proh = readRDS('ch_OvC_FFPE_proteinSet.rds')
 #bring in marker data
 setwd(dir="/Users/cshughes/Documents/projects/OvC/markers/")
 genesCC = read.table("./Schwartz_ClearCellTable_geneList.txt", header=FALSE, sep='\t')
