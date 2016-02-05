@@ -10,8 +10,8 @@ pcve = readRDS('ch_OvC_wStd_Proteins_CCCvEMC.rds')
 
 
 
-
-pSet = merge(hvc,hve,by='Gene')
+#this is just a basic plot that will allow you to extract subtype markers by comparing with the two others
+pSet = merge(phvc,phve,by='Gene')
 pdf('ch_OvC_wStd_Proteins_HGSMarkers_Scatter.pdf')
 cols<-col2rgb(rev(brewer.pal(6,"RdBu")))
 plot(pSet$PROexp.x,pSet$PROexp.y,pch=20,col=rgb(cols[1,1],cols[2,1],cols[3,1],95,maxColorValue=255),cex=0.5)
@@ -29,7 +29,7 @@ dev.off()
 #work for HGS data
 ###############################################################################
 ###############################################################################
-#this does 1 gene across all cancers
+#this does 1 gene across all cancers in TCGA
 ###############################################################################
 
 #pull in the TCGA data
@@ -72,7 +72,7 @@ dev.off()
 
 
 ###############################################################################
-#this does multiple genes across ovarian cancer
+#this does multiple genes across ovarian cancer in TCGA
 ###############################################################################
 library(beeswarm)
 gn = c('FOLR1','CRIP1','MSLN','SNCG','CRABP2','LEFTY1','GDF15','QPCT','GPC3','CTH')
