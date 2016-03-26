@@ -51,6 +51,7 @@ setwd(dir="/Users/cshughes/Documents/projects/OvC/RNAexpression/")
 ens<-read.table("./HumanProteomeMap_Science_TableS1.txt", header=TRUE, sep='\t')
 hpa<-read.table("./HumanProteinAtlas_FPKM_allsamples.txt", header=TRUE, sep='\t')
 setwd(dir="/Users/cshughes/Documents/projects/OvC/FFPE/Routput/")
+pecP = readRDS('ch_OvC_FFPE_proteinSet.rds')
 #change the gene colname
 colnames(ens)[2] = 'Gene'
 colnames(hpa)[1] = 'ensg_id'
@@ -126,6 +127,57 @@ length(unique(t9))#8167
 t10na = is.na(proSet[,13])
 t10 = c(t9,proSet[!t10na,2])
 length(unique(t10))#8167
+
+
+#heat map for IDs
+#use proSet
+#make a counter for peptide numbers
+pepSet$pepNum = 1
+proSet2 = aggregate(pepNum~Accession+Gene+Descriptions,data=pepSet,sum,na.action=na.pass,na.rm=TRUE)
+lset = cbind(proSet,proSet2)
+lset = lset[,c(1:3,17,8,13,9,4,12,7,5,6,11,10)]
+lset$missing = ifelse(rowSums(is.na(lset[5:14]))>0,'yes','no')
+lset = lset[order(-lset$pepNum),]
+xnorm = lset[lset$pepNum==1,5:14]
+xnorm = xnorm[order(rowSums(is.na(xnorm))),]
+xnorm[xnorm>0] = 1.1
+xnorm[is.na(xnorm)] = 0
+
+#make the plot
+mybreaks = seq(0,2,by=0.1)
+xLabels<- c('hgs1','hgs2','hgs3','hgs4','hgs5','ccc1','ccc2','ccc3','ccc4','ccc5')
+ColSideColors = c(rep(brewer.pal(6,'Accent')[1],5),rep(brewer.pal(6,'Accent')[3],5))
+pdf('ch_OvC_TMT10_FFPE_Human_Proteins_IDheatmap_Sub.pdf')
+heatmap.2(
+		as.matrix(xnorm),
+		col= colorRampPalette(brewer.pal(11,"RdBu"))(length(mybreaks)-1),
+		symkey=FALSE,
+		Rowv=FALSE,
+		Colv=FALSE,
+		dendrogram="none",
+		breaks=mybreaks,
+		#cellnote = round(ovCor,2),
+		labRow = '',
+		labCol = xLabels,
+		las=2,
+		ColSideColors=ColSideColors,
+		colsep = 1:10,
+		rowsep = 1:10,
+		sepwidth = c(0.03, 0.03),
+		sepcolor = 'white',
+		## labels
+		main='test',
+		## color key
+		key = FALSE,
+		keysize = 1,
+		density.info = "none",
+		scale = "none",
+		trace = "none",
+		mar=c(8,8),
+		cexRow=1.5,
+		cexCol=1.5
+)
+dev.off()
 
 
 ##########################################################

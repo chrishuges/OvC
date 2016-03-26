@@ -34,9 +34,9 @@ geneCC = as.character(genesCC[,1])
 geneS = as.character(genesS[,1])
 geneTot = c(geneCC,geneS)
 #only keep markers that are present in the data
-markHGSCCC = geneTot[which(geneTot %in% phvc$Gene)]
-markHGS = geneS[which(geneS %in% phvc$Gene)]
-markCCC = geneCC[which(geneCC %in% phvc$Gene)]
+markHGSCCC = geneTot[which(geneTot %in% hvc$Gene)]
+markHGS = geneS[which(geneS %in% hvc$Gene)]
+markCCC = geneCC[which(geneCC %in% hvc$Gene)]
 #make the plot
 pdf('ch_OvC_CellLine_Proteins-RNA_HGSvCCC_CorrScatter.pdf')
 cols<-rev(brewer.pal(6,"RdBu"))
@@ -55,7 +55,7 @@ hvc.s = hvc[gnRM,]
 xCol = col2rgb(ifelse(hvc.s$Gene %in% markCCC, cols[1], ifelse(hvc.s$Gene %in% markHGS, cols[6],'gray60')))
 xCex = ifelse(hvc.s$Gene %in% markHGSCCC, 2, 1)
 plot(hvc.s$PROexp,hvc.s$RNAexp,pch=20,col=rgb(xCol[1,],xCol[2,],xCol[3,],95,maxColorValue=255),cex=xCex,xlim = c(-4,4),ylim = c(-7,7))
-text(hvc.s$PROexp,hvc.s$RNAexp,hvc.s$Gene,cex=0.5)
+#text(hvc.s$PROexp,hvc.s$RNAexp,hvc.s$Gene,cex=0.5)
 text(1,-3,paste('r = ',cor(hvc.s$PROexp,hvc.s$RNAexp,use='pairwise.complete.obs'),sep=''))
 dev.off()
 
