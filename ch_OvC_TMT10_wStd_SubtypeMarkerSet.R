@@ -24,6 +24,15 @@ abline(v=0,lwd=2,lty=2)
 dev.off()
 
 
+###get marker proteins
+pSet = merge(phvc,phve,by='Gene')
+
+exp = subset(phvc, PROexp<0.5 & p.fdr<=0.05)
+write.table(exp,'ch_OvC_wStd_HGSvCCC_CCCup_proteinSet.txt',quote=FALSE,sep='\t',col.names=TRUE,row.names=FALSE)
+
+
+
+
 
 
 #merge the protein and RNA data

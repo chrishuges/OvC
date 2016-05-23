@@ -197,5 +197,36 @@ dev.off()
 
 
 
+###############################################################################
+###how many in the top 500 genes that describe variance between HGSC and CCC
+###############################################################################
+#read in the data
+pro = readRDS('ch_OvC_wStd_RLEset.rds')
+#calculate mean expression for the subtypes
+pro$hgs1 = rowMeans(pro[,c(2:4,11:13)],na.rm=TRUE)
+pro$ccc1 = rowMeans(pro[,c(5:7,14:16)],na.rm=TRUE)
+#calculate the variance and order by it
+pro$var = apply(pro[,20:21], 1, function(x) var(x, na.rm=TRUE))
+proV = pro[order(-pro$var),]
+#remove rows that have any NA values
+proS = subset(proV, rowSums(is.na(proV[,2:13]))==0)
+#do a quick PCA to look
+hCols = brewer.pal(6,'Accent')
+pcCols = c(rep(hCols[1],6),rep(hCols[2],6))
+pcPCH = c(rep(15,6),rep(19,6))
+pca <- prcomp(t(proS[,2:13]))
+pdf('ch_OvC_TMT10_wStd_Human_Proteins_CCCSig_PCA.pdf')
+plot(pca$x[,1:2],
+		col=pcCols,
+		pch=pcPCH,
+		cex = 2
+)
+box(lwd=3)
+dev.off()
+
+#keep top 500 genes based on variance
+proX = proS[1:500,]
+#specify the number of genes to keep for the clustering
+gin = proX[proX$Gene %in% ccTOT,]
 
 
