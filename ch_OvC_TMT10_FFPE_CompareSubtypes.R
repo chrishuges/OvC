@@ -173,8 +173,13 @@ bindFC = function(x,...){
 	fit2 <- eBayes(fit2)
 	pep.r$logFC = fit2$coef
 	pep.r$pVal = fit2$p.value
+	#pep.a = aggregate(cbind(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,logFC,pVal)~Accession+Gene+Descriptions,data=pep.r,na.action=na.pass,FUN=median,na.rm=TRUE)
+	#colnames(pep.a)[14:15] = c('logFC','pVal')
+	#pep.a = subset(pep.a, rowSums(is.na(pep.a[,4:13]))<2)
 	#subset anything with a small FC
-	vnorm = subset(pep.r, logFC< -1 | logFC> 1)
+	#vnorm = subset(pep.r, logFC< -1 | logFC> 1)
+	pep.r = pep.r[order(-abs(pep.r$logFC)),]
+	vnorm = pep.r[1:1000,]
 	#output the data
 	return(vnorm)
 }
@@ -182,11 +187,12 @@ bindFC = function(x,...){
 ovA = bindFC(a12h)
 ovB = bindFC(b12h)
 #get the correlation maps
-ovCorA = cor(ovA[,c(5:14)], use='pairwise.complete.obs', method='pearson')
+ovCor = cor(ovA[,c(5:14)], use='pairwise.complete.obs', method='pearson')
 ovCorB = cor(ovB[,c(5:14)], use='pairwise.complete.obs', method='pearson')
-ovCor[lower.tri(ovCorA)] <- ovCorB[lower.tri(ovCorB)]
+ovCor[lower.tri(ovCor)] <- ovCorB[lower.tri(ovCorB)]
 #make the plot
-pdf('ch_OvC_TMT10_FFPE_Human_Peptides_HGSvCCC_HeatMap.pdf')
+pdf('ch_OvC_TMT10_FFPE_Human_Peptides_HGSvCCC_HeatMap_top500.pdf')
+#pdf('ch_test.pdf')
 #make the plot labels and boundaries
 xLabels<- names(ovCor)
 mybreaks = seq(0,0.9,by=0.05)

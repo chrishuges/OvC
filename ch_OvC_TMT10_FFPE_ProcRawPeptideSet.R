@@ -60,19 +60,19 @@ processPSM <- function(psmFile, proteinFile, replicate, ... ){
 	#filter the data columns
 	print('removing contaminants')
 	print(dim(pep.m))
-	pep.r = pep.m[,c(1,20,21,23,22,7,9:18)]
+	pep.r = pep.m[,c(1,20,21,23,22,7,3,9:18)]
 	#aggregate the PSMs into peptides
 	print('aggregating peptides')
-	pep.a = aggregate(cbind(X126,X127N,X127C,X128N,X128C,X129N,X129C,X130N,X130C,X131)~Accession+Gene+Org+Descriptions+Sequence+Confidence,data=pep.r,median,na.action=na.pass,na.rm=TRUE)
-	colnames(pep.a) = c('Accession','Gene','Organism','Descriptions','Sequence','Confidence','a1','a2','a3','a4','a5','a6','a7','a8','a9','a10')
+	pep.a = aggregate(cbind(X126,X127N,X127C,X128N,X128C,X129N,X129C,X130N,X130C,X131)~Accession+Gene+Org+Descriptions+Sequence+Confidence+Modifications,data=pep.r,median,na.action=na.pass,na.rm=TRUE)
+	colnames(pep.a) = c('Accession','Gene','Organism','Descriptions','Sequence','Confidence','Modifications','a1','a2','a3','a4','a5','a6','a7','a8','a9','a10')
 	print(dim(pep.a))
 	#replace NaN with NA
-	pep.a[,7:16] = round(pep.a[,7:16],2)
-	pep.a[,7:16][is.na(pep.a[,7:16])]<-NA
+	pep.a[,8:17] = round(pep.a[,8:17],2)
+	pep.a[,8:17][is.na(pep.a[,8:17])]<-NA
 	#filter based on S/N
-	pep.f1 = subset(pep.a, rowMeans(pep.a[,7:16], na.rm=TRUE)>5)
+	pep.f1 = subset(pep.a, rowMeans(pep.a[,8:17], na.rm=TRUE)>5)
 	#filter based on NA
-	pep.f2 = subset(pep.f1, rowSums(is.na(pep.f1[,7:16]))<8)
+	pep.f2 = subset(pep.f1, rowSums(is.na(pep.f1[,8:17]))<8)
 	#add replicate counter
 	pep.f2$Rep = replicate
 	#output the data
@@ -91,5 +91,18 @@ saveRDS(ovfb1.psm,'ch_OvC_FFPE_processedPeptides_fb1.rds')
 saveRDS(ovfb2.psm,'ch_OvC_FFPE_processedPeptides_fb2.rds')
 
 
+
+length(which(!grepl('TMT6plex',ovfa1.psm$Modifications))) #818
+length(which(!grepl('TMT6plex',ovfa2.psm$Modifications))) #814
+length(which(!grepl('TMT6plex',ovfb1.psm$Modifications))) #641
+length(which(!grepl('TMT6plex',ovfb2.psm$Modifications))) #521
+nrow(ovfa1.psm) #55095
+nrow(ovfa2.psm) #54748
+nrow(ovfb1.psm) #52517
+nrow(ovfb2.psm) #46928
+
+meanID = 52322
+meanNOTMT = 698
+rate = 
 
 

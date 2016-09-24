@@ -19,6 +19,9 @@ setwd(dir="/Users/cshughes/Documents/projects/OvC/CellLine/Routput") #change thi
 pro = readRDS('ch_OvC_CellLine_proteinSet.rds')
 colnames(pro)[5] = 'PROexp'
 
+setwd(dir="/Users/cshughes/Documents/projects/OvC/wStd/Routput") #change this to whatever directory you have stored the data in
+pro = readRDS('ch_OvC_wStd_Proteins_HGSvCCC.rds')
+
 
 
 #merge the protein and RNA data
@@ -62,4 +65,19 @@ dev.off()
 
 
 
+genesCC$type = 'CCC'
+genesS$type = 'HGSC'
+geneTot = rbind(genesCC,genesS)
+colnames(geneTot)[1] = 'Gene'
+geneTot$anno = 'SET'
+x = merge(geneTot,pro[,c(1,5)], all=TRUE)
+colnames(x)[4] = 'FFPE'
+xy = merge(x,pro[,c(1,5)], all=TRUE)
+colnames(xy)[5] = 'Frozen'
+xyz = merge(xy,pro[,c(1,5)], all=TRUE)
+colnames(xyz)[6] = 'Cell'
+xyza = merge(xyz,pro[,c(1,7)], all=TRUE)
+colnames(xyza)[7] = 'wStd'
 
+
+write.table(xyza[!is.na(xyza$anno),],'ch_112GeneSet_proteinSet.txt',quote=FALSE,sep='\t',col.names=TRUE,row.names=FALSE)

@@ -159,15 +159,17 @@ proS = subset(proV, rowSums(is.na(proV[,2:19]))==0)
 
 #specify the number of genes to keep for the clustering
 proX = proS[proS$Gene %in% ccTOT,]
+proXs = proX[1:75,]
 #built the heatmap
-pdf('ch_OvC_TMT10_wStd_Human_Proteins_OCCCsig_HeatMap.pdf')
+#pdf('ch_OvC_TMT10_wStd_Human_Proteins_OCCCsig_HeatMap.pdf')
+pdf('ch_test.pdf')
 #make the plot labels and boundaries
 xLabels<- c('hgs1','hgs2','hgs3','ccc1','ccc2','ccc3','emc1','emc2','emc3','hgs4','hgs5','hgs6','ccc4','ccc5','ccc6','emc4','emc5','emc6')
 mybreaks = seq(-2,2,by=0.05)
 ColSideColors = c(rep(brewer.pal(6,'Accent')[1],3),rep(brewer.pal(6,'Accent')[2],3),rep(brewer.pal(6,'Accent')[3],3),rep(brewer.pal(6,'Accent')[1],3),rep(brewer.pal(6,'Accent')[2],3),rep(brewer.pal(6,'Accent')[3],3))
 #make the correlation heatmap
 heatmap.2(
-		as.matrix(proX[2:19]),
+		as.matrix(proXs[2:19]),
 		col= colorRampPalette(brewer.pal(6,"RdBu"))(length(mybreaks)-1),
 		symkey=TRUE,
 		Rowv=TRUE,
@@ -194,6 +196,46 @@ heatmap.2(
 dev.off()
 
 
+ovCor = cor(proXs[2:19], use='pairwise.complete.obs', method='pearson')
+#make the plot
+pdf('ch_test2.pdf')
+#pdf('ch_test.pdf')
+#make the plot labels and boundaries
+xLabels<- c('hgs1','hgs2','hgs3','ccc1','ccc2','ccc3','emc1','emc2','emc3','hgs4','hgs5','hgs6','ccc4','ccc5','ccc6','emc4','emc5','emc6')
+mybreaks = seq(0,0.9,by=0.05)
+ColSideColors = c(rep(brewer.pal(6,'Accent')[1],3),rep(brewer.pal(6,'Accent')[2],3),rep(brewer.pal(6,'Accent')[3],3),rep(brewer.pal(6,'Accent')[1],3),rep(brewer.pal(6,'Accent')[2],3),rep(brewer.pal(6,'Accent')[3],3))
+#make the correlation heatmap
+heatmap.2(
+		ovCor,
+		col= colorRampPalette(brewer.pal(9,"YlOrRd"))(length(mybreaks)-1),
+		symkey=FALSE,
+		Rowv=TRUE,
+		Colv=TRUE,
+		dendrogram="both",
+		breaks=mybreaks,
+		cellnote = round(ovCor,2),
+		labRow = xLabels,
+		labCol = xLabels,
+		notecol = 'black',
+		notecex = 0.75,
+		colsep = 1:12,
+		rowsep = 1:12,
+		sepwidth = c(0.03, 0.03),
+		sepcolor = 'white',
+		ColSideColors=ColSideColors,
+		## labels
+		main='OvC Subtype Correlation',
+		## color key
+		key = TRUE,
+		keysize = 1,
+		density.info = "none",
+		scale = "none",
+		trace = "none",
+		mar=c(8,8),
+		cexRow=1.2,
+		cexCol=1.2
+)
+dev.off()
 
 
 
