@@ -41,3 +41,11 @@ text(4,2.3,paste('p<0.05'),cex=1.25)
 text(proh$PROexp,-log10(proh$score),proh$Gene,cex=0.25)
 dev.off()
 
+
+
+
+
+#write out the data
+write.table(phvc,'ch_oct2016_HGSCvsCCC_wStd_proteinSet.txt',quote=FALSE,sep='\t',col.names=TRUE,row.names=FALSE)
+
+
